@@ -29,7 +29,9 @@ class Cube {
             [x + o, y - o, z + o],
             [x + o, y + o, z - o],
             [x + o, y + o, z + o],
-        ].map((pt) => rotate3d(pt, [this.xa, this.ya, this.za]));
+        ].map((pt) =>
+            rotate3d(pt, [this.xa, this.ya, this.za], [this.x, this.y, this.z])
+        );
 
         return {
             vertices,
@@ -51,38 +53,41 @@ class Cube {
     }
 }
 
-// const FOCUS = 100;
+const FOCUS = 256;
 
 function project2d([x, y, z]) {
-    return [x, y];
-    // return [(x / z) * FOCUS, (y / z) * FOCUS];
+    return [(x / z) * FOCUS, (y / z) * FOCUS];
 }
 
-function rotate3d([x, y, z], [ϕ, θ, ψ]) {
+function rotate3d([x, y, z], [φ, θ, ψ], [ox, oy, oz] = [0, 0, 0]) {
     const { cos, sin } = Math;
 
-    const cosϕ = cos(ϕ);
+    const cosφ = cos(φ);
     const cosθ = cos(θ);
     const cosψ = cos(ψ);
 
-    const sinϕ = sin(ϕ);
+    const sinφ = sin(φ);
     const sinθ = sin(θ);
     const sinψ = sin(ψ);
 
     const a11 = cosθ * cosψ;
-    const a12 = cosϕ * sinψ + sinϕ * sinθ * cosψ;
-    const a13 = sinϕ * sinψ - cosϕ * sinθ * cosψ;
+    const a12 = cosφ * sinψ + sinφ * sinθ * cosψ;
+    const a13 = sinφ * sinψ - cosφ * sinθ * cosψ;
     const a21 = -cosθ * sinψ;
-    const a22 = cosϕ * cosψ - sinϕ * sinθ * sinψ;
-    const a23 = sinϕ * cosψ + cosϕ * sinθ * sinψ;
+    const a22 = cosφ * cosψ - sinφ * sinθ * sinψ;
+    const a23 = sinφ * cosψ + cosφ * sinθ * sinψ;
     const a31 = sinθ;
-    const a32 = -sinϕ * cosθ;
-    const a33 = cosϕ * cosθ;
+    const a32 = -sinφ * cosθ;
+    const a33 = cosφ * cosθ;
+
+    const nx = x - ox;
+    const ny = y - oy;
+    const nz = z - oz;
 
     return [
-        a11 * x + a12 * y + a13 * z,
-        a21 * x + a22 * y + a23 * z,
-        a31 * x + a32 * y + a33 * z,
+        ox + a11 * nx + a12 * ny + a13 * nz,
+        oy + a21 * nx + a22 * ny + a23 * nz,
+        oz + a31 * nx + a32 * ny + a33 * nz,
     ];
 }
 
@@ -115,9 +120,9 @@ function actionPerformed() {
         ctx.stroke();
     });
 
-    ctx.fillRect(cube.x - 5, cube.y - 5, 10, 10);
-
     cube.xa += 0.01;
+    cube.ya += 0.02;
+    cube.za += 0.03;
 
     ctx.restore();
 
