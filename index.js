@@ -3,6 +3,8 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
+const IS_ORTHOGRAPHIC = false;
+
 class Cube {
     constructor(x, y, z, size, textures) {
         this.x = x;
@@ -30,9 +32,7 @@ class Cube {
             [x + o, y - o, z + o], // 5 top    right back
             [x + o, y + o, z - o], // 6 bottom right front
             [x + o, y + o, z + o], // 7 bottom right back
-        ].map((pt) =>
-            rotate3d(pt, [this.xa, this.ya, this.za], [this.x, this.y, this.z])
-        );
+        ].map((pt) => rotate3d(pt, [this.xa, this.ya, this.za], [this.x, this.y, this.z]));
 
         return {
             vertices,
@@ -64,43 +64,239 @@ class Cube {
     }
 }
 
+const WHITE = "#FEFEFE";
+const BLACK = "#1B1B1D";
+const ORANGE = "#EC702D";
+const RED = "#BD2827";
+const YELLOW = "#EECF4E";
+const GREEN = "#7CB257";
+const BLUE = "#2C5DA6";
+
 class Puzzle {
+    static RENDER_VERTICES = false;
+    static RENDER_EDGES = false;
+    static RENDER_FACES = true;
+
+    static SIZE = IS_ORTHOGRAPHIC ? 100 : 5;
+
     constructor(x, y, z) {
         this.cubes = [
-            // new Cube(x - 16, y - 16, z - 16, 16),
-            // new Cube(x - 16, y - 16, z, 16),
-            // new Cube(x - 16, y - 16, z + 16, 16),
-            // new Cube(x - 16, y, z - 16, 16),
-            // new Cube(x - 16, y, z, 16),
-            // new Cube(x - 16, y, z + 16, 16),
-            // new Cube(x - 16, y + 16, z - 16, 16),
-            // new Cube(x - 16, y + 16, z, 16),
-            // new Cube(x - 16, y + 16, z + 16, 16),
-            // new Cube(x, y - 16, z - 16, 16),
-            // new Cube(x, y - 16, z, 16),
-            // new Cube(x, y - 16, z + 16, 16),
-            // new Cube(x, y, z - 16, 16),
-            new Cube(x, y, z, 16, [
-                ["red", "black"],
-                ["orange", "black"],
-                ["yellow", "black"],
-                ["green", "black"],
-                ["blue", "black"],
-                ["purple", "black"],
+            new Cube(x - Puzzle.SIZE, y - Puzzle.SIZE, z - Puzzle.SIZE, Puzzle.SIZE, [
+                [BLUE, BLACK],
+                [BLACK, BLACK],
+                [ORANGE, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [WHITE, BLACK],
             ]),
-            // new Cube(x, y, z + 16, 16),
-            // new Cube(x, y + 16, z - 16, 16),
-            // new Cube(x, y + 16, z, 16),
-            // new Cube(x, y + 16, z + 16, 16),
-            // new Cube(x + 16, y - 16, z - 16, 16),
-            // new Cube(x + 16, y - 16, z, 16),
-            // new Cube(x + 16, y - 16, z + 16, 16),
-            // new Cube(x + 16, y, z - 16, 16),
-            // new Cube(x + 16, y, z, 16),
-            // new Cube(x + 16, y, z + 16, 16),
-            // new Cube(x + 16, y + 16, z - 16, 16),
-            // new Cube(x + 16, y + 16, z, 16),
-            // new Cube(x + 16, y + 16, z + 16, 16),
+            new Cube(x - Puzzle.SIZE, y - Puzzle.SIZE, z, Puzzle.SIZE, [
+                [BLUE, BLACK],
+                [BLACK, BLACK],
+                [ORANGE, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+            ]),
+            new Cube(x - Puzzle.SIZE, y - Puzzle.SIZE, z + Puzzle.SIZE, Puzzle.SIZE, [
+                [BLUE, BLACK],
+                [BLACK, BLACK],
+                [ORANGE, BLACK],
+                [BLACK, BLACK],
+                [RED, BLACK],
+                [BLACK, BLACK],
+            ]),
+            new Cube(x - Puzzle.SIZE, y, z - Puzzle.SIZE, Puzzle.SIZE, [
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [ORANGE, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [WHITE, BLACK],
+            ]),
+            new Cube(x - Puzzle.SIZE, y, z, Puzzle.SIZE, [
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [ORANGE, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+            ]),
+            new Cube(x - Puzzle.SIZE, y, z + Puzzle.SIZE, Puzzle.SIZE, [
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [ORANGE, BLACK],
+                [BLACK, BLACK],
+                [RED, BLACK],
+                [BLACK, BLACK],
+            ]),
+            new Cube(x - Puzzle.SIZE, y + Puzzle.SIZE, z - Puzzle.SIZE, Puzzle.SIZE, [
+                [BLACK, BLACK],
+                [GREEN, BLACK],
+                [ORANGE, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [WHITE, BLACK],
+            ]),
+            new Cube(x - Puzzle.SIZE, y + Puzzle.SIZE, z, Puzzle.SIZE, [
+                [BLACK, BLACK],
+                [GREEN, BLACK],
+                [ORANGE, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+            ]),
+            new Cube(x - Puzzle.SIZE, y + Puzzle.SIZE, z + Puzzle.SIZE, Puzzle.SIZE, [
+                [BLACK, BLACK],
+                [GREEN, BLACK],
+                [ORANGE, BLACK],
+                [BLACK, BLACK],
+                [RED, BLACK],
+                [BLACK, BLACK],
+            ]),
+            new Cube(x, y - Puzzle.SIZE, z - Puzzle.SIZE, Puzzle.SIZE, [
+                [BLUE, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [WHITE, BLACK],
+            ]),
+            new Cube(x, y - Puzzle.SIZE, z, Puzzle.SIZE, [
+                [BLUE, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+            ]),
+            new Cube(x, y - Puzzle.SIZE, z + Puzzle.SIZE, Puzzle.SIZE, [
+                [BLUE, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [RED, BLACK],
+                [WHITE, BLACK],
+            ]),
+            new Cube(x, y, z - Puzzle.SIZE, Puzzle.SIZE, [
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [WHITE, BLACK],
+            ]),
+            new Cube(x, y, z, Puzzle.SIZE, [
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+            ]),
+            new Cube(x, y, z + Puzzle.SIZE, Puzzle.SIZE, [
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [RED, BLACK],
+                [BLACK, BLACK],
+            ]),
+            new Cube(x, y + Puzzle.SIZE, z - Puzzle.SIZE, Puzzle.SIZE, [
+                [BLACK, BLACK],
+                [GREEN, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [WHITE, BLACK],
+            ]),
+            new Cube(x, y + Puzzle.SIZE, z, Puzzle.SIZE, [
+                [BLACK, BLACK],
+                [GREEN, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+            ]),
+            new Cube(x, y + Puzzle.SIZE, z + Puzzle.SIZE, Puzzle.SIZE, [
+                [BLACK, BLACK],
+                [GREEN, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [RED, BLACK],
+                [BLACK, BLACK],
+            ]),
+            new Cube(x + Puzzle.SIZE, y - Puzzle.SIZE, z - Puzzle.SIZE, Puzzle.SIZE, [
+                [BLUE, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [YELLOW, BLACK],
+                [BLACK, BLACK],
+                [WHITE, BLACK],
+            ]),
+            new Cube(x + Puzzle.SIZE, y - Puzzle.SIZE, z, Puzzle.SIZE, [
+                [BLUE, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [YELLOW, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+            ]),
+            new Cube(x + Puzzle.SIZE, y - Puzzle.SIZE, z + Puzzle.SIZE, Puzzle.SIZE, [
+                [BLUE, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [YELLOW, BLACK],
+                [RED, BLACK],
+                [BLACK, BLACK],
+            ]),
+            new Cube(x + Puzzle.SIZE, y, z - Puzzle.SIZE, Puzzle.SIZE, [
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [YELLOW, BLACK],
+                [BLACK, BLACK],
+                [WHITE, BLACK],
+            ]),
+            new Cube(x + Puzzle.SIZE, y, z, Puzzle.SIZE, [
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [YELLOW, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+            ]),
+            new Cube(x + Puzzle.SIZE, y, z + Puzzle.SIZE, Puzzle.SIZE, [
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+                [YELLOW, BLACK],
+                [RED, BLACK],
+                [BLACK, BLACK],
+            ]),
+            new Cube(x + Puzzle.SIZE, y + Puzzle.SIZE, z - Puzzle.SIZE, Puzzle.SIZE, [
+                [BLACK, BLACK],
+                [GREEN, BLACK],
+                [BLACK, BLACK],
+                [YELLOW, BLACK],
+                [BLACK, BLACK],
+                [WHITE, BLACK],
+            ]),
+            new Cube(x + Puzzle.SIZE, y + Puzzle.SIZE, z, Puzzle.SIZE, [
+                [BLACK, BLACK],
+                [GREEN, BLACK],
+                [BLACK, BLACK],
+                [YELLOW, BLACK],
+                [BLACK, BLACK],
+                [BLACK, BLACK],
+            ]),
+            new Cube(x + Puzzle.SIZE, y + Puzzle.SIZE, z + Puzzle.SIZE, Puzzle.SIZE, [
+                [BLACK, BLACK],
+                [GREEN, BLACK],
+                [BLACK, BLACK],
+                [YELLOW, BLACK],
+                [RED, BLACK],
+                [BLACK, BLACK],
+            ]),
         ];
 
         this.x = x;
@@ -113,80 +309,79 @@ class Puzzle {
     }
 
     draw(ctx) {
+        const group = {
+            vertices: [],
+            edges: [],
+            faces: [],
+            textures: [],
+        };
+
         for (const cube of this.cubes) {
             const mesh = cube.computeMesh();
 
             mesh.vertices = mesh.vertices.map((pt) =>
-                rotate3d(
-                    pt,
-                    [this.xa, this.ya, this.za],
-                    [this.x, this.y, this.z]
-                )
+                rotate3d(pt, [this.xa, this.ya, this.za], [this.x, this.y, this.z])
             );
 
-            // mesh.vertices
-            //     .map((pt) => project2d(pt))
-            //     .forEach(([x, y], _) => {
-            //         ctx.beginPath();
-            //         ctx.arc(x, y, 2, 0, 2 * Math.PI);
-            //         ctx.closePath();
-            //         ctx.fill();
-            //     });
+            group.edges.push(...mesh.edges.map((x) => x.map((n) => n + group.vertices.length)));
+            group.faces.push(...mesh.faces.map((x) => x.map((n) => n + group.vertices.length)));
 
-            // mesh.edges.forEach(([a, b]) => {
-            //     ctx.beginPath();
-            //     ctx.moveTo(...project2d(mesh.vertices[a]));
-            //     ctx.lineTo(...project2d(mesh.vertices[b]));
-            //     ctx.closePath();
-            //     ctx.stroke();
-            // });
+            group.vertices.push(...mesh.vertices);
 
-            mesh.faces
-                .slice()
-                .map((indices, i) => ({ indices, texture: mesh.textures[i] }))
-                .sort(({ indices: a }, { indices: b }) => {
-                    const az =
-                        a.reduce((t, i) => t + mesh.vertices[i][2], 0) /
-                        a.length;
+            group.textures.push(...mesh.textures);
+        }
 
-                    const bz =
-                        b.reduce((t, i) => t + mesh.vertices[i][2], 0) /
-                        b.length;
+        const sortedFaces = group.faces
+            .map((indices, i) => ({ indices, texture: group.textures[i] }))
+            .sort(({ indices: a }, { indices: b }) => {
+                const az = a.reduce((t, i) => t + group.vertices[i][2], 0) / a.length;
+                const bz = b.reduce((t, i) => t + group.vertices[i][2], 0) / b.length;
 
-                    return bz - az;
-                })
-                .forEach(({ indices, texture }, i) => {
+                return bz - az;
+            });
+
+        for (const { indices, texture } of sortedFaces) {
+            if (typeof texture === "string") {
+                /* image texture */
+            }
+
+            if (Array.isArray(texture)) {
+                const toCamera = IS_ORTHOGRAPHIC
+                    ? [0, 0, -1]
+                    : (() => {
+                          const vertices = indices.map((i) => group.vertices[i]);
+
+                          const avgx = vertices.reduce((t, v) => t + v[0], 0) / vertices.length;
+                          const avgy = vertices.reduce((t, v) => t + v[1], 0) / vertices.length;
+                          const avgz = vertices.reduce((t, v) => t + v[2], 0) / vertices.length;
+
+                          return [-avgx, -avgy, -avgz];
+                      })();
+
+                if (
+                    facingDirection(
+                        indices.map((i) => group.vertices[i]),
+                        toCamera
+                    )
+                ) {
                     ctx.beginPath();
-                    ctx.moveTo(...project2d(mesh.vertices[indices[0]]));
-                    for (const pt of indices.slice(1))
-                        ctx.lineTo(...project2d(mesh.vertices[pt]));
+                    ctx.moveTo(...project2d(group.vertices[indices[0]]));
+                    for (const pt of indices.slice(1)) ctx.lineTo(...project2d(group.vertices[pt]));
                     ctx.closePath();
 
-                    if (typeof texture === "string") {
-                        /* image texture */
-                    }
+                    ctx.fillStyle = texture[0];
 
-                    if (Array.isArray(texture)) {
-                        if (
-                            facingDirection(
-                                indices.map((i) => mesh.vertices[i]),
-                                [0, 0, -1]
-                            )
-                        ) {
-                            ctx.fillStyle = texture[0];
-
-                            ctx.fill();
-                        }
-                    }
-                });
+                    ctx.fill();
+                }
+            }
         }
     }
 }
 
-const FOCUS = 256;
+const ZOOM = 1000;
 
 function project2d([x, y, z]) {
-    return [(x / z) * FOCUS, (y / z) * FOCUS];
+    return IS_ORTHOGRAPHIC ? [x, y] : [(x / z) * ZOOM, (y / z) * ZOOM];
 }
 
 function rotate3d([x, y, z], [φ, θ, ψ], [ox, oy, oz] = [0, 0, 0]) {
@@ -225,15 +420,7 @@ function computeNormal([p1, p2, p3]) {
     const a = [p2[0] - p1[0], p2[1] - p1[1], p2[2] - p1[2]];
     const b = [p3[0] - p2[0], p3[1] - p2[1], p3[2] - p2[2]];
 
-    const normal = [
-        a[1] * b[2] - a[2] * b[1],
-        a[2] * b[0] - a[0] * b[2],
-        a[0] * b[1] - a[1] * b[0],
-    ];
-
-    const magnitude = Math.hypot(...normal);
-
-    return magnitude ? normal.map((n) => n / magnitude) : [0, 0, 0];
+    return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
 }
 
 function facingDirection(polygon, [d1, d2, d3]) {
@@ -243,6 +430,9 @@ function facingDirection(polygon, [d1, d2, d3]) {
 }
 
 const puzzle = new Puzzle(0, 0, 50);
+
+// Puzzle.RENDER_EDGES = true;
+// Puzzle.RENDER_VERTICES = true;
 
 function actionPerformed() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);

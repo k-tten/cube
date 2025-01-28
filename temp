@@ -1,0 +1,53 @@
+if (Puzzle.RENDER_VERTICES)
+    mesh.vertices
+        .map((pt) => project2d(pt))
+        .forEach(([x, y], _) => {
+            ctx.beginPath();
+            ctx.arc(x, y, 2, 0, 2 * Math.PI);
+            ctx.closePath();
+            ctx.fillStyle = "white";
+            ctx.fill();
+        });
+
+if (Puzzle.RENDER_EDGES)
+    mesh.edges.forEach(([a, b]) => {
+        ctx.beginPath();
+        ctx.moveTo(...project2d(mesh.vertices[a]));
+        ctx.lineTo(...project2d(mesh.vertices[b]));
+        ctx.closePath();
+        ctx.strokeStyle = "white";
+        ctx.stroke();
+    });
+
+mesh.faces
+    .slice()
+    .map((indices, i) => ({ indices, texture: mesh.textures[i] }))
+    .sort(({ indices: a }, { indices: b }) => {
+        const az = Math.min(...a.map((x) => mesh.vertices[x][2]));
+        const bz = Math.min(...b.map((x) => mesh.vertices[x][2]));
+
+        return bz - az;
+    })
+    .forEach(({ indices, texture }, _) => {
+        ctx.beginPath();
+        ctx.moveTo(...project2d(mesh.vertices[indices[0]]));
+        for (const pt of indices.slice(1)) ctx.lineTo(...project2d(mesh.vertices[pt]));
+        ctx.closePath();
+
+        if (typeof texture === "string") {
+            /* image texture */
+        }
+
+        if (Array.isArray(texture)) {
+            if (
+                facingDirection(
+                    indices.map((i) => mesh.vertices[i]),
+                    [0, 0, -1]
+                )
+            ) {
+                ctx.fillStyle = texture[0];
+
+                ctx.fill();
+            }
+        }
+    });
