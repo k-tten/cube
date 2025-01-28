@@ -331,47 +331,72 @@ class Puzzle {
             group.textures.push(...mesh.textures);
         }
 
-        const sortedFaces = group.faces
-            .map((indices, i) => ({ indices, texture: group.textures[i] }))
-            .sort(({ indices: a }, { indices: b }) => {
-                const az = a.reduce((t, i) => t + group.vertices[i][2], 0) / a.length;
-                const bz = b.reduce((t, i) => t + group.vertices[i][2], 0) / b.length;
+        if (Puzzle.RENDER_VERTICES)
+            group.vertices
+                .map((pt) => project2d(pt))
+                .forEach(([x, y], _) => {
+                    ctx.beginPath();
+                    ctx.arc(x, y, 2, 0, 2 * Math.PI);
+                    ctx.closePath();
+                    ctx.fillStyle = "white";
+                    ctx.fill();
+                });
 
-                return bz - az;
+        if (Puzzle.RENDER_EDGES)
+            group.edges.forEach(([a, b]) => {
+                ctx.beginPath();
+                ctx.moveTo(...project2d(group.vertices[a]));
+                ctx.lineTo(...project2d(group.vertices[b]));
+                ctx.closePath();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = "white";
+                ctx.stroke();
             });
 
-        for (const { indices, texture } of sortedFaces) {
-            if (typeof texture === "string") {
-                /* image texture */
-            }
+        if (Puzzle.RENDER_FACES) {
+            const sortedFaces = group.faces
+                .map((indices, i) => ({ indices, texture: group.textures[i] }))
+                .sort(({ indices: a }, { indices: b }) => {
+                    const az = a.reduce((t, i) => t + group.vertices[i][2], 0) / a.length;
+                    const bz = b.reduce((t, i) => t + group.vertices[i][2], 0) / b.length;
 
-            if (Array.isArray(texture)) {
-                const toCamera = IS_ORTHOGRAPHIC
-                    ? [0, 0, -1]
-                    : (() => {
-                          const vertices = indices.map((i) => group.vertices[i]);
+                    return bz - az;
+                });
 
-                          const avgx = vertices.reduce((t, v) => t + v[0], 0) / vertices.length;
-                          const avgy = vertices.reduce((t, v) => t + v[1], 0) / vertices.length;
-                          const avgz = vertices.reduce((t, v) => t + v[2], 0) / vertices.length;
+            for (const { indices, texture } of sortedFaces) {
+                if (typeof texture === "string") {
+                    /* image texture */
+                }
 
-                          return [-avgx, -avgy, -avgz];
-                      })();
+                if (Array.isArray(texture)) {
+                    const toCamera = IS_ORTHOGRAPHIC
+                        ? [0, 0, -1]
+                        : (() => {
+                              const vertices = indices.map((i) => group.vertices[i]);
 
-                if (
-                    facingDirection(
-                        indices.map((i) => group.vertices[i]),
-                        toCamera
-                    )
-                ) {
-                    ctx.beginPath();
-                    ctx.moveTo(...project2d(group.vertices[indices[0]]));
-                    for (const pt of indices.slice(1)) ctx.lineTo(...project2d(group.vertices[pt]));
-                    ctx.closePath();
+                              const avgx = vertices.reduce((t, v) => t + v[0], 0) / vertices.length;
+                              const avgy = vertices.reduce((t, v) => t + v[1], 0) / vertices.length;
+                              const avgz = vertices.reduce((t, v) => t + v[2], 0) / vertices.length;
 
-                    ctx.fillStyle = texture[0];
+                              return [-avgx, -avgy, -avgz];
+                          })();
 
-                    ctx.fill();
+                    if (
+                        facingDirection(
+                            indices.map((i) => group.vertices[i]),
+                            toCamera
+                        )
+                    ) {
+                        ctx.beginPath();
+                        ctx.moveTo(...project2d(group.vertices[indices[0]]));
+                        for (const pt of indices.slice(1))
+                            ctx.lineTo(...project2d(group.vertices[pt]));
+                        ctx.closePath();
+
+                        ctx.fillStyle = texture[0];
+
+                        ctx.fill();
+                    }
                 }
             }
         }
@@ -433,6 +458,7 @@ const puzzle = new Puzzle(0, 0, 50);
 
 // Puzzle.RENDER_EDGES = true;
 // Puzzle.RENDER_VERTICES = true;
+// Puzzle.RENDER_FACES = false;
 
 function actionPerformed() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -442,10 +468,6 @@ function actionPerformed() {
     ctx.translate(canvas.width / 2, canvas.height / 2);
 
     puzzle.draw(ctx);
-
-    puzzle.xa += 0.01;
-    puzzle.ya += 0.02;
-    puzzle.za += 0.03;
 
     ctx.restore();
 
