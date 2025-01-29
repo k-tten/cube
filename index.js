@@ -460,12 +460,34 @@ const puzzle = new Puzzle(0, 0, 50);
 // Puzzle.RENDER_VERTICES = true;
 // Puzzle.RENDER_FACES = false;
 
+const mouse = {
+    x: 0,
+    y: 0,
+    lastx: -1,
+    lasty: -1,
+    down: false,
+};
+
 function actionPerformed() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     ctx.save();
 
     ctx.translate(canvas.width / 2, canvas.height / 2);
+
+    if (mouse.down) {
+        if (mouse.y !== mouse.lasty) {
+            // compute rotation axis
+
+            mouse.lasty = mouse.y;
+        }
+
+        if (mouse.x !== mouse.lastx) {
+            //
+
+            mouse.lastx = mouse.x;
+        }
+    }
 
     puzzle.draw(ctx);
 
@@ -479,4 +501,43 @@ requestAnimationFrame(actionPerformed);
 window.addEventListener("resize", () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+});
+
+// handle other mouse events later
+
+window.addEventListener("mousemove", (e) => {
+    if (mouse.down) {
+        mouse.lastx = mouse.x;
+        mouse.lasty = mouse.y;
+    } else {
+        mouse.lastx = -1;
+        mouse.lasty = -1;
+    }
+
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+});
+
+window.addEventListener("mousedown", (e) => {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+
+    mouse.lastx = e.clientX;
+    mouse.lasty = e.clientY;
+
+    mouse.down = true;
+
+    canvas.style.cursor = "grabbing";
+});
+
+window.addEventListener("mouseup", (e) => {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+
+    mouse.lastx = e.clientX;
+    mouse.lasty = e.clientY;
+
+    mouse.down = false;
+
+    canvas.style.cursor = "grab";
 });
