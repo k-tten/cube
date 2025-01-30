@@ -11,9 +11,7 @@ class Cube {
         this.y = y;
         this.z = z;
 
-        this.xa = 0;
-        this.ya = 0;
-        this.za = 0;
+        this.rotation = [1, 0, 0, 0];
 
         this.size = size;
         this.textures = textures ?? [];
@@ -32,7 +30,7 @@ class Cube {
             [x + o, y - o, z + o], // 5 top    right back
             [x + o, y + o, z - o], // 6 bottom right front
             [x + o, y + o, z + o], // 7 bottom right back
-        ].map((pt) => rotate3d(pt, [this.xa, this.ya, this.za], [this.x, this.y, this.z]));
+        ].map((pt) => rotate3d(pt, this.rotation, [this.x, this.y, this.z]));
 
         return {
             vertices,
@@ -303,9 +301,7 @@ class Puzzle {
         this.y = y;
         this.z = z;
 
-        this.xa = 0;
-        this.ya = 0;
-        this.za = 0;
+        this.rotation = [1, 0, 0, 0];
     }
 
     draw(ctx) {
@@ -320,7 +316,7 @@ class Puzzle {
             const mesh = cube.computeMesh();
 
             mesh.vertices = mesh.vertices.map((pt) =>
-                rotate3d(pt, [this.xa, this.ya, this.za], [this.x, this.y, this.z])
+                rotate3d(pt, this.rotation, [this.x, this.y, this.z])
             );
 
             group.edges.push(...mesh.edges.map((x) => x.map((n) => n + group.vertices.length)));
@@ -403,32 +399,45 @@ class Puzzle {
     }
 }
 
-const ZOOM = 1000;
+let ZOOM = 1000;
 
 function project2d([x, y, z]) {
     return IS_ORTHOGRAPHIC ? [x, y] : [(x / z) * ZOOM, (y / z) * ZOOM];
 }
 
-function rotate3d([x, y, z], [φ, θ, ψ], [ox, oy, oz] = [0, 0, 0]) {
-    const { cos, sin } = Math;
+function quaternionMult(a, b) {
+    return [
+        a[0] * b[0] - a[1] * b[1] - a[2] * b[2] - a[3] * b[3], // 1 (scalar part)
+        a[0] * b[1] + a[1] * b[0] + a[2] * b[3] - a[3] * b[2], // i
+        a[0] * b[2] - a[1] * b[3] + a[2] * b[0] + a[3] * b[1], // j
+        a[0] * b[3] + a[1] * b[2] - a[2] * b[1] + a[3] * b[0], // k
+    ];
+}
 
-    const cosφ = cos(φ);
-    const cosθ = cos(θ);
-    const cosψ = cos(ψ);
+function axisToQuaternion(x, y, z, a) {
+    const factor = Math.sin(a / 2);
 
-    const sinφ = sin(φ);
-    const sinθ = sin(θ);
-    const sinψ = sin(ψ);
+    const i = x * factor;
+    const j = y * factor;
+    const k = z * factor;
 
-    const a11 = cosθ * cosψ;
-    const a12 = cosφ * sinψ + sinφ * sinθ * cosψ;
-    const a13 = sinφ * sinψ - cosφ * sinθ * cosψ;
-    const a21 = -cosθ * sinψ;
-    const a22 = cosφ * cosψ - sinφ * sinθ * sinψ;
-    const a23 = sinφ * cosψ + cosφ * sinθ * sinψ;
-    const a31 = sinθ;
-    const a32 = -sinφ * cosθ;
-    const a33 = cosφ * cosθ;
+    const w = Math.cos(a / 2);
+
+    const magnitude = Math.hypot(w, i, j, k);
+
+    return [w, i, j, k].map((n) => n / magnitude);
+}
+
+function rotate3d([x, y, z], [qw, qx, qy, qz], [ox, oy, oz] = [0, 0, 0]) {
+    const a11 = qw ** 2 + qx ** 2 - qy ** 2 - qz ** 2;
+    const a12 = 2 * (qx * qy - qw * qz);
+    const a13 = 2 * (qz * qx + qw * qy);
+    const a21 = 2 * (qx * qy + qw * qz);
+    const a22 = qw ** 2 + qy ** 2 - qx ** 2 - qz ** 2;
+    const a23 = 2 * (qy * qz - qw * qx);
+    const a31 = 2 * (qz * qx - qw * qy);
+    const a32 = 2 * (qy * qz + qw * qx);
+    const a33 = qw ** 2 + qz ** 2 - qx ** 2 - qy ** 2;
 
     const nx = x - ox;
     const ny = y - oy;
@@ -477,19 +486,27 @@ function actionPerformed() {
 
     if (mouse.down) {
         if (mouse.y !== mouse.lasty) {
-            // compute rotation axis
+            puzzle.rotation = quaternionMult(
+                puzzle.rotation,
+                axisToQuaternion(1, 0, 0, (mouse.y - mouse.lasty) / 100)
+            );
 
             mouse.lasty = mouse.y;
         }
 
         if (mouse.x !== mouse.lastx) {
-            //
+            puzzle.rotation = quaternionMult(
+                puzzle.rotation,
+                axisToQuaternion(0, 1, 0, -(mouse.x - mouse.lastx) / 100)
+            );
 
             mouse.lastx = mouse.x;
         }
     }
 
     puzzle.draw(ctx);
+
+    // puzzle.rotation = quaternionMult(puzzle.rotation, [0.999, 0.0, 0.046, 0.015]);
 
     ctx.restore();
 
@@ -541,3 +558,7 @@ window.addEventListener("mouseup", (e) => {
 
     canvas.style.cursor = "grab";
 });
+
+// window.addEventListener("wheel", (e) => {
+//     ZOOM += Math.sign(e.deltaY) * 100;
+// });
