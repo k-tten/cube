@@ -316,7 +316,7 @@ class Puzzle {
             const mesh = cube.computeMesh();
 
             mesh.vertices = mesh.vertices.map((pt) =>
-                rotate3d(pt, this.rotation, [this.x, this.y, this.z])
+                rotate3d(pt, this.rotation, [this.x, this.y, this.z]),
             );
 
             group.edges.push(...mesh.edges.map((x) => x.map((n) => n + group.vertices.length)));
@@ -380,7 +380,7 @@ class Puzzle {
                     if (
                         facingDirection(
                             indices.map((i) => group.vertices[i]),
-                            toCamera
+                            toCamera,
                         )
                     ) {
                         ctx.beginPath();
@@ -487,8 +487,8 @@ function actionPerformed() {
     if (mouse.down) {
         if (mouse.y !== mouse.lasty) {
             puzzle.rotation = quaternionMult(
+                axisToQuaternion(1, 0, 0, (mouse.y - mouse.lasty) / 200),
                 puzzle.rotation,
-                axisToQuaternion(1, 0, 0, (mouse.y - mouse.lasty) / 100)
             );
 
             mouse.lasty = mouse.y;
@@ -496,8 +496,8 @@ function actionPerformed() {
 
         if (mouse.x !== mouse.lastx) {
             puzzle.rotation = quaternionMult(
+                axisToQuaternion(0, 1, 0, -(mouse.x - mouse.lastx) / 200),
                 puzzle.rotation,
-                axisToQuaternion(0, 1, 0, -(mouse.x - mouse.lastx) / 100)
             );
 
             mouse.lastx = mouse.x;
