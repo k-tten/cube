@@ -538,7 +538,7 @@ const mouse = {
     lastx: -1,
     lasty: -1,
     down: false,
-    context: undefined, // { cube: Cube, face: points }
+    context: undefined, // { cube: Cube, face: 2d points, vertices: 3d points }
 };
 
 function actionPerformed() {
@@ -552,7 +552,7 @@ function actionPerformed() {
         if (!mouse.context) {
             if (mouse.y !== mouse.lasty) {
                 puzzle.rotation = quaternionMult(
-                    axisToQuaternion(1, 0, 0, (mouse.y - mouse.lasty) / 100),
+                    axisToQuaternion(1, 0, 0, (mouse.y - mouse.lasty) / 200),
                     puzzle.rotation,
                 );
 
@@ -561,7 +561,7 @@ function actionPerformed() {
 
             if (mouse.x !== mouse.lastx) {
                 puzzle.rotation = quaternionMult(
-                    axisToQuaternion(0, 1, 0, -(mouse.x - mouse.lastx) / 100),
+                    axisToQuaternion(0, 1, 0, -(mouse.x - mouse.lastx) / 200),
                     puzzle.rotation,
                 );
 
@@ -569,21 +569,54 @@ function actionPerformed() {
             }
         } else {
             if (Math.hypot(mouse.x - mouse.ox, mouse.y - mouse.oy) > 32) {
-                const { cube, face } = mouse.context;
+                const { cube, face, vertices } = mouse.context;
 
                 // only need to check 2 edges since the other 2 edges are roughly parallel even in perspective projection
                 const v1 = sub(face[0], face[1]);
                 const v2 = sub(face[1], face[2]);
+
+                const e1 = sub(vertices[0], vertices[1]);
+                const e2 = sub(vertices[1], vertices[2]);
 
                 const v = [mouse.x - mouse.ox, mouse.y - mouse.oy];
 
                 const v1s = Math.min(dot(v1, v), dot(neg(v1), v));
                 const v2s = Math.min(dot(v2, v), dot(neg(v2), v));
 
-                const s = cross(v1, v2);
+                const m = v1s > v2s ? e2 : e1;
+
+                const s = cross(e1, e2);
+
+                const n = cross(m, s);
+
+                const p0 = [cube.x, cube.y, cube.z];
+
+                const D = dot(n, p0);
 
                 puzzle.cubes.forEach((c) => {
-                    //?
+                    const mesh = c.computeMesh();
+
+                    mesh.vertices = mesh.vertices.map((pt) =>
+                        rotate3d(pt, puzzle.rotation, [puzzle.x, puzzle.y, puzzle.z]),
+                    );
+
+                    const signs = mesh.vertices.map((p) => Math.sign(dot(p, n) - D));
+
+                    if (signs.includes(-1) && signs.includes(1)) {
+                        const t = c.textures;
+
+                        // TEMPORARY
+                        c.textures = [
+                            [BLACK, BLACK],
+                            [BLACK, BLACK],
+                            [BLACK, BLACK],
+                            [BLACK, BLACK],
+                            [BLACK, BLACK],
+                            [BLACK, BLACK],
+                        ];
+
+                        setTimeout(() => (c.textures = t), 1000);
+                    }
                 });
 
                 mouse.context = undefined;
@@ -677,7 +710,7 @@ window.addEventListener("mousedown", (e) => {
 
         if (tri1 + tri2 + tri3 + tri4 > quad) continue;
 
-        mouse.context = { cube, face };
+        mouse.context = { cube, face, vertices: indices.map((i) => mesh.vertices[i]) };
 
         break;
     }
