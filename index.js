@@ -3,7 +3,11 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-const IS_ORTHOGRAPHIC = false;
+const SETTINGS = {
+    IS_ORTHOGRAPHIC: false,
+    ZOOM: 1000,
+    SENSITIVITY: 1, // 0 to 1 (percentage)
+};
 
 class Cube {
     constructor(x, y, z, size, puzzle, textures) {
@@ -89,7 +93,9 @@ class Puzzle {
     static TOP = 2;
     static BOTTOM = 3;
 
-    static SIZE = IS_ORTHOGRAPHIC ? 100 : 5;
+    static get SIZE() {
+        return SETTINGS.IS_ORTHOGRAPHIC ? 100 : 5;
+    }
 
     constructor(x, y, z) {
         this.state = [
@@ -424,7 +430,7 @@ class Puzzle {
                 }
 
                 if (Array.isArray(texture)) {
-                    const toCamera = IS_ORTHOGRAPHIC
+                    const toCamera = SETTINGS.IS_ORTHOGRAPHIC
                         ? [0, 0, -1]
                         : (() => {
                               const vertices = indices.map((i) => mesh.vertices[i]);
@@ -457,10 +463,8 @@ class Puzzle {
     }
 }
 
-let ZOOM = 1000;
-
 function project2d([x, y, z]) {
-    return IS_ORTHOGRAPHIC ? [x, y] : [(x / z) * ZOOM, (y / z) * ZOOM];
+    return SETTINGS.IS_ORTHOGRAPHIC ? [x, y] : [(x / z) * SETTINGS.ZOOM, (y / z) * SETTINGS.ZOOM];
 }
 
 function quaternionMult(a, b) {
@@ -550,9 +554,11 @@ function actionPerformed() {
 
     if (mouse.down) {
         if (!mouse.context) {
+            const factor = (2 - SETTINGS.SENSITIVITY) * 200;
+
             if (mouse.y !== mouse.lasty) {
                 puzzle.rotation = quaternionMult(
-                    axisToQuaternion(1, 0, 0, (mouse.y - mouse.lasty) / 200),
+                    axisToQuaternion(1, 0, 0, (mouse.y - mouse.lasty) / factor),
                     puzzle.rotation,
                 );
                 mouse.lasty = mouse.y;
@@ -560,13 +566,17 @@ function actionPerformed() {
 
             if (mouse.x !== mouse.lastx) {
                 puzzle.rotation = quaternionMult(
-                    axisToQuaternion(0, 1, 0, -(mouse.x - mouse.lastx) / 200),
+                    axisToQuaternion(0, 1, 0, -(mouse.x - mouse.lastx) / factor),
                     puzzle.rotation,
                 );
                 mouse.lastx = mouse.x;
             }
         } else {
-            if (Math.hypot(mouse.x - mouse.ox, mouse.y - mouse.oy) > 32 && !mouse.context.moved) {
+            if (
+                Math.hypot(mouse.x - mouse.ox, mouse.y - mouse.oy) >
+                    (1.01 - SETTINGS.SENSITIVITY) * 0.68 + 1 &&
+                !mouse.context.moved
+            ) {
                 const { cube, face, vertices } = mouse.context;
 
                 const v1 = sub(face[0], face[1]);
@@ -639,11 +649,11 @@ requestAnimationFrame(actionPerformed);
 window.addEventListener("resize", () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+
+    ctx.translate(canvas.width / 2, canvas.height / 2);
 });
 
-// handle other mouse events later
-
-window.addEventListener("mousemove", (e) => {
+function pointermove(e) {
     if (mouse.down) {
         mouse.lastx = mouse.x;
         mouse.lasty = mouse.y;
@@ -652,19 +662,13 @@ window.addEventListener("mousemove", (e) => {
         mouse.lasty = -1;
     }
 
-    mouse.x = e.clientX;
-    mouse.y = e.clientY;
-});
+    mouse.x = e.touches?.[0]?.clientX ?? e.clientX;
+    mouse.y = e.touches?.[0]?.clientY ?? e.clientY;
+}
 
-window.addEventListener("mousedown", (e) => {
-    mouse.x = e.clientX;
-    mouse.y = e.clientY;
-
-    mouse.ox = e.clientX;
-    mouse.oy = e.clientY;
-
-    mouse.lastx = e.clientX;
-    mouse.lasty = e.clientY;
+function pointerdown(e) {
+    mouse.x = mouse.ox = mouse.lastx = e.touches?.[0]?.clientX ?? e.clientX;
+    mouse.y = mouse.oy = mouse.lasty = e.touches?.[0]?.clientY ?? e.clientY;
 
     mouse.down = true;
 
@@ -716,17 +720,14 @@ window.addEventListener("mousedown", (e) => {
     }
 
     canvas.style.cursor = "grabbing";
-});
+}
 
-window.addEventListener("mouseup", (e) => {
-    mouse.x = e.clientX;
-    mouse.y = e.clientY;
+function pointerup(e) {
+    mouse.x = mouse.lastx = e.touches?.[0]?.clientX ?? e.clientX;
+    mouse.y = mouse.lasty = e.touches?.[0]?.clientY ?? e.clientY;
 
     mouse.ox = -1;
     mouse.oy = -1;
-
-    mouse.lastx = e.clientX;
-    mouse.lasty = e.clientY;
 
     mouse.down = false;
 
@@ -739,14 +740,26 @@ window.addEventListener("mouseup", (e) => {
     }
 
     canvas.style.cursor = "grab";
+}
+
+window.addEventListener("touchmove", pointermove);
+
+window.addEventListener("touchstart", pointerdown);
+
+window.addEventListener("touchend", pointerup);
+
+window.addEventListener("mousemove", pointermove);
+
+window.addEventListener("mousedown", pointerdown);
+
+window.addEventListener("mouseup", pointerup);
+
+window.addEventListener("wheel", (e) => {
+    if (SETTINGS.ZOOM > 2000 && e.deltaY > 0) return;
+    if (SETTINGS.ZOOM < 500 && e.deltaY < 0) return;
+
+    SETTINGS.ZOOM += Math.sign(e.deltaY) * 100 * (SETTINGS.SENSITIVITY + 0.1);
 });
-
-// window.addEventListener("wheel", (e) => {
-//     if (ZOOM > 2000 && e.deltaY > 0) return;
-//     if (ZOOM < 500 && e.deltaY < 0) return;
-
-//     ZOOM += Math.sign(e.deltaY) * 100;
-// });
 
 function dot(a, b) {
     if (a.length === 2 || b.length === 2) return a[0] * b[0] + a[1] * b[1];
