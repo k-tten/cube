@@ -540,15 +540,13 @@ const mouse = {
     lastx: -1,
     lasty: -1,
     down: false,
-    context: undefined, // { cube: Cube, face: 2d points, vertices: 3d points }
+    context: undefined, // { cube: Cube, face: 2d points, vertices: 3d points, moved: boolean }
 };
 
+ctx.translate(canvas.width / 2, canvas.height / 2);
+
 function actionPerformed() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    ctx.save();
-
-    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.clearRect(-canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height);
 
     if (mouse.down) {
         if (!mouse.context) {
@@ -568,7 +566,7 @@ function actionPerformed() {
                 mouse.lastx = mouse.x;
             }
         } else {
-            if (Math.hypot(mouse.x - mouse.ox, mouse.y - mouse.oy) > 32) {
+            if (Math.hypot(mouse.x - mouse.ox, mouse.y - mouse.oy) > 32 && !mouse.context.moved) {
                 const { cube, face, vertices } = mouse.context;
 
                 const v1 = sub(face[0], face[1]);
@@ -589,6 +587,7 @@ function actionPerformed() {
                 // select edge the mouse movement is more closely aligned with
                 const n = v1s > v2s ? e1 : e2;
 
+                // rotate cube center to match render
                 const p0 = rotate3d([cube.x, cube.y, cube.z], puzzle.rotation, [
                     puzzle.x,
                     puzzle.y,
@@ -606,6 +605,7 @@ function actionPerformed() {
 
                     const signs = mesh.vertices.map((p) => Math.sign(dot(p, n) - D));
 
+                    // check if the plane intersects the cube
                     if (signs.includes(-1) && signs.includes(1)) {
                         const t = c.textures;
 
@@ -620,20 +620,16 @@ function actionPerformed() {
                         ];
 
                         setTimeout(() => (c.textures = t), 500);
+                        // END TEMPORARY
                     }
                 });
 
-                mouse.context = undefined;
-                mouse.down = false;
+                mouse.context.moved = true;
             }
         }
     }
 
     puzzle.draw(ctx);
-
-    // puzzle.rotation = quaternionMult(puzzle.rotation, [0.999, 0.0, 0.046, 0.015]);
-
-    ctx.restore();
 
     requestAnimationFrame(actionPerformed);
 }
@@ -711,9 +707,10 @@ window.addEventListener("mousedown", (e) => {
         const tri3 = triangleArea([face[2], face[3], [realx, realy]]);
         const tri4 = triangleArea([face[3], face[0], [realx, realy]]);
 
+        // mouse is outside the face
         if (tri1 + tri2 + tri3 + tri4 > quad) continue;
 
-        mouse.context = { cube, face, vertices: indices.map((i) => mesh.vertices[i]) };
+        mouse.context = { cube, face, vertices: indices.map((i) => mesh.vertices[i]), moved: false };
 
         break;
     }
@@ -734,7 +731,9 @@ window.addEventListener("mouseup", (e) => {
     mouse.down = false;
 
     if (mouse.context) {
-        // perform the rotation, if any
+        if (mouse.context.moved) {
+            // perform the rotation, if any
+        }
 
         mouse.context = undefined;
     }
@@ -783,5 +782,5 @@ function triangleArea([v0, v1, v2]) {
     const edge1 = sub(v1, v0);
     const edge2 = sub(v2, v0);
 
-    return 0.5 * cross(edge1, edge2);
+    return cross(edge1, edge2) / 2;
 }
