@@ -519,6 +519,8 @@ function facingDirection([p1, p2, p3], d) {
 
 const puzzle = new Puzzle(0, 0, 50);
 
+// puzzle.rotation = [0.436, -0.003, -0.854, 0.285];
+
 // puzzle.cubes[0].rotateAbout(axisToQuaternion(0, 1, 0, Math.PI / 2), [
 //     puzzle.x,
 //     puzzle.y + Puzzle.SIZE,
@@ -555,7 +557,6 @@ function actionPerformed() {
                     axisToQuaternion(1, 0, 0, (mouse.y - mouse.lasty) / 200),
                     puzzle.rotation,
                 );
-
                 mouse.lasty = mouse.y;
             }
 
@@ -564,32 +565,35 @@ function actionPerformed() {
                     axisToQuaternion(0, 1, 0, -(mouse.x - mouse.lastx) / 200),
                     puzzle.rotation,
                 );
-
                 mouse.lastx = mouse.x;
             }
         } else {
             if (Math.hypot(mouse.x - mouse.ox, mouse.y - mouse.oy) > 32) {
                 const { cube, face, vertices } = mouse.context;
 
-                // only need to check 2 edges since the other 2 edges are roughly parallel even in perspective projection
                 const v1 = sub(face[0], face[1]);
                 const v2 = sub(face[1], face[2]);
+                const v3 = sub(face[2], face[3]);
+                const v4 = sub(face[3], face[0]);
 
+                // only need 2 edges since they are parallel in 3D
                 const e1 = sub(vertices[0], vertices[1]);
                 const e2 = sub(vertices[1], vertices[2]);
 
                 const v = [mouse.x - mouse.ox, mouse.y - mouse.oy];
 
-                const v1s = Math.min(dot(v1, v), dot(neg(v1), v));
-                const v2s = Math.min(dot(v2, v), dot(neg(v2), v));
+                // best scores of both sets of edges in 2D
+                const v1s = Math.min(dot(v1, v), dot(neg(v1), v), dot(v3, v), dot(neg(v3), v));
+                const v2s = Math.min(dot(v2, v), dot(neg(v2), v), dot(v4, v), dot(neg(v4), v));
 
-                const m = v1s > v2s ? e2 : e1;
+                // select edge the mouse movement is more closely aligned with
+                const n = v1s > v2s ? e1 : e2;
 
-                const s = cross(e1, e2);
-
-                const n = cross(m, s);
-
-                const p0 = [cube.x, cube.y, cube.z];
+                const p0 = rotate3d([cube.x, cube.y, cube.z], puzzle.rotation, [
+                    puzzle.x,
+                    puzzle.y,
+                    puzzle.z,
+                ]);
 
                 const D = dot(n, p0);
 
@@ -615,13 +619,12 @@ function actionPerformed() {
                             [BLACK, BLACK],
                         ];
 
-                        setTimeout(() => (c.textures = t), 1000);
+                        setTimeout(() => (c.textures = t), 500);
                     }
                 });
 
                 mouse.context = undefined;
                 mouse.down = false;
-                // fuck
             }
         }
     }
