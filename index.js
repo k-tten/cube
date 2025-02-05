@@ -757,7 +757,13 @@ window.addEventListener("touchmove", (e) => {
         e.preventDefault();
 
         // safari scale
-        const scale = "scale" in e ? e.scale : distance(e) / pinch.distance;
+        const scale =
+            "scale" in e
+                ? e.scale
+                : Math.hypot(
+                      e.touches[0].pageX - e.touches[1].pageX,
+                      e.touches[0].pageY - e.touches[1].pageY,
+                  ) / pinch.distance;
 
         if (SETTINGS.ZOOM > 2000 && scale > 1) return;
         if (SETTINGS.ZOOM < 500 && scale < 1) return;
