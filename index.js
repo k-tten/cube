@@ -732,6 +732,44 @@ window.addEventListener("mousedown", pointerdown);
 
 window.addEventListener("mouseup", pointerup);
 
+// pinch zooming
+let pinch = {
+    x: -1,
+    y: -1,
+    distance: -1,
+};
+
+window.addEventListener("touchstart", (e) => {
+    if (e.touches.length === 2) {
+        e.preventDefault();
+
+        pinch.x = (e.touches[0].pageX + e.touches[1].pageX) / 2;
+        pinch.y = (e.touches[0].pageY + e.touches[1].pageY) / 2;
+        pinch.distance = Math.hypot(
+            e.touches[0].pageX - e.touches[1].pageX,
+            e.touches[0].pageY - e.touches[1].pageY,
+        );
+    }
+});
+
+window.addEventListener("touchmove", (e) => {
+    if (e.touches.length === 2) {
+        e.preventDefault();
+
+        // safari scale
+        const scale = "scale" in e ? e.scale : distance(e) / pinch.distance;
+
+        if (SETTINGS.ZOOM > 2000 && scale > 1) return;
+        if (SETTINGS.ZOOM < 500 && scale < 1) return;
+
+        SETTINGS.ZOOM += Math.sign(scale - 1) * 100 * (SETTINGS.SENSITIVITY + 0.1);
+    }
+});
+
+window.addEventListener("touchend", (e) => {
+    pinch = {};
+});
+
 window.addEventListener("wheel", (e) => {
     if (SETTINGS.ZOOM > 2000 && e.deltaY > 0) return;
     if (SETTINGS.ZOOM < 500 && e.deltaY < 0) return;
