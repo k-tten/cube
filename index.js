@@ -461,78 +461,19 @@ class Puzzle {
     }
 }
 
-function project2d([x, y, z]) {
-    return SETTINGS.IS_ORTHOGRAPHIC ? [x, y] : [(x / z) * SETTINGS.ZOOM, (y / z) * SETTINGS.ZOOM];
-}
-
-function quaternionMult(a, b) {
-    return [
-        a[0] * b[0] - a[1] * b[1] - a[2] * b[2] - a[3] * b[3], // 1 (scalar part)
-        a[0] * b[1] + a[1] * b[0] + a[2] * b[3] - a[3] * b[2], // i
-        a[0] * b[2] - a[1] * b[3] + a[2] * b[0] + a[3] * b[1], // j
-        a[0] * b[3] + a[1] * b[2] - a[2] * b[1] + a[3] * b[0], // k
-    ];
-}
-
-function axisToQuaternion(x, y, z, a) {
-    const factor = Math.sin(a / 2);
-
-    const i = x * factor;
-    const j = y * factor;
-    const k = z * factor;
-
-    const w = Math.cos(a / 2);
-
-    const magnitude = Math.hypot(w, i, j, k);
-
-    return [w, i, j, k].map((n) => n / magnitude);
-}
-
-function rotate3d([x, y, z], [qw, qx, qy, qz], [ox, oy, oz] = [0, 0, 0]) {
-    const a11 = qw ** 2 + qx ** 2 - qy ** 2 - qz ** 2;
-    const a12 = 2 * (qx * qy - qw * qz);
-    const a13 = 2 * (qz * qx + qw * qy);
-    const a21 = 2 * (qx * qy + qw * qz);
-    const a22 = qw ** 2 + qy ** 2 - qx ** 2 - qz ** 2;
-    const a23 = 2 * (qy * qz - qw * qx);
-    const a31 = 2 * (qz * qx - qw * qy);
-    const a32 = 2 * (qy * qz + qw * qx);
-    const a33 = qw ** 2 + qz ** 2 - qx ** 2 - qy ** 2;
-
-    const nx = x - ox;
-    const ny = y - oy;
-    const nz = z - oz;
-
-    return [
-        ox + a11 * nx + a12 * ny + a13 * nz,
-        oy + a21 * nx + a22 * ny + a23 * nz,
-        oz + a31 * nx + a32 * ny + a33 * nz,
-    ];
-}
-
-function facingDirection([p1, p2, p3], d) {
-    const a = sub(p2, p1);
-    const b = sub(p3, p1);
-
-    const n = cross(a, b);
-
-    return dot(n, d) > 0;
-}
-
 const puzzle = new Puzzle(0, 0, 50);
-
-// puzzle.rotation = [0.436, -0.003, -0.854, 0.285];
-
-// puzzle.cubes[0].rotateAbout(axisToQuaternion(0, 1, 0, Math.PI / 2), [
-//     puzzle.x,
-//     puzzle.y + Puzzle.SIZE,
-//     puzzle.z,
-// ]);
 
 // Puzzle.RENDER_VERTICES = true;
 // Puzzle.RENDER_INDICES = true;
 // Puzzle.RENDER_EDGES = true;
 // Puzzle.RENDER_FACES = false;
+
+/* ACTION HANDLING */
+
+const animation = {
+    running: false,
+    //
+};
 
 const mouse = {
     x: 0,
@@ -547,7 +488,7 @@ const mouse = {
 
 ctx.translate(canvas.width / 2, canvas.height / 2);
 
-function actionPerformed() {
+function update() {
     ctx.clearRect(-canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height);
 
     if (mouse.down) {
@@ -670,10 +611,12 @@ function actionPerformed() {
 
     puzzle.draw(ctx);
 
-    requestAnimationFrame(actionPerformed);
+    requestAnimationFrame(update);
 }
 
-requestAnimationFrame(actionPerformed);
+requestAnimationFrame(update);
+
+/* EVENT HANDLING */
 
 window.addEventListener("resize", () => {
     canvas.width = window.innerWidth;
@@ -800,6 +743,66 @@ window.addEventListener("wheel", (e) => {
 window.addEventListener("contextmenu", (e) => {
     e.preventDefault();
 });
+
+/* MATH SHIT */
+
+function project2d([x, y, z]) {
+    return SETTINGS.IS_ORTHOGRAPHIC ? [x, y] : [(x / z) * SETTINGS.ZOOM, (y / z) * SETTINGS.ZOOM];
+}
+
+function quaternionMult(a, b) {
+    return [
+        a[0] * b[0] - a[1] * b[1] - a[2] * b[2] - a[3] * b[3], // 1 (scalar part)
+        a[0] * b[1] + a[1] * b[0] + a[2] * b[3] - a[3] * b[2], // i
+        a[0] * b[2] - a[1] * b[3] + a[2] * b[0] + a[3] * b[1], // j
+        a[0] * b[3] + a[1] * b[2] - a[2] * b[1] + a[3] * b[0], // k
+    ];
+}
+
+function axisToQuaternion(x, y, z, a) {
+    const factor = Math.sin(a / 2);
+
+    const i = x * factor;
+    const j = y * factor;
+    const k = z * factor;
+
+    const w = Math.cos(a / 2);
+
+    const magnitude = Math.hypot(w, i, j, k);
+
+    return [w, i, j, k].map((n) => n / magnitude);
+}
+
+function rotate3d([x, y, z], [qw, qx, qy, qz], [ox, oy, oz] = [0, 0, 0]) {
+    const a11 = qw ** 2 + qx ** 2 - qy ** 2 - qz ** 2;
+    const a12 = 2 * (qx * qy - qw * qz);
+    const a13 = 2 * (qz * qx + qw * qy);
+    const a21 = 2 * (qx * qy + qw * qz);
+    const a22 = qw ** 2 + qy ** 2 - qx ** 2 - qz ** 2;
+    const a23 = 2 * (qy * qz - qw * qx);
+    const a31 = 2 * (qz * qx - qw * qy);
+    const a32 = 2 * (qy * qz + qw * qx);
+    const a33 = qw ** 2 + qz ** 2 - qx ** 2 - qy ** 2;
+
+    const nx = x - ox;
+    const ny = y - oy;
+    const nz = z - oz;
+
+    return [
+        ox + a11 * nx + a12 * ny + a13 * nz,
+        oy + a21 * nx + a22 * ny + a23 * nz,
+        oz + a31 * nx + a32 * ny + a33 * nz,
+    ];
+}
+
+function facingDirection([p1, p2, p3], d) {
+    const a = sub(p2, p1);
+    const b = sub(p3, p1);
+
+    const n = cross(a, b);
+
+    return dot(n, d) > 0;
+}
 
 function dot(a, b) {
     if (a.length === 2 || b.length === 2) return a[0] * b[0] + a[1] * b[1];
