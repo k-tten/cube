@@ -34,3 +34,4 @@
 -   [How can I determine whether a 2D Point is within a Polygon?](https://stackoverflow.com/questions/217578/how-can-i-determine-whether-a-2d-point-is-within-a-polygon)
 -   [Given a bounding box and a line (two points), determine if the line intersects the box](https://stackoverflow.com/questions/3235385/given-a-bounding-box-and-a-line-two-points-determine-if-the-line-intersects-t)
 -   [How would I find all the cubes a ray intersects in a 3d grid?](https://stackoverflow.com/questions/4563879/how-would-i-find-all-the-cubes-a-ray-intersects-in-a-3d-grid)
+-   [How to implement pinch zoom in zoom out using javascript](https://stackoverflow.com/questions/74010960/how-to-implement-pinch-zoom-in-zoom-out-using-javascript)

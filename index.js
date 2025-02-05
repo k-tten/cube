@@ -4,13 +4,13 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 const SETTINGS = {
-    IS_ORTHOGRAPHIC: false,
+    IS_ORTHOGRAPHIC: false, // dev setting (will not be toggleable in UI)
     ZOOM: 1000,
     SENSITIVITY: 1, // 0 to 1 (percentage)
 };
 
 class Cube {
-    constructor(x, y, z, size, puzzle, textures) {
+    constructor(x, y, z, size, textures) {
         this.x = x;
         this.y = y;
         this.z = z;
@@ -19,8 +19,6 @@ class Cube {
 
         this.size = size;
         this.textures = textures ?? [];
-
-        this.puzzle = puzzle;
     }
 
     rotateAbout(q, point) {
@@ -132,7 +130,7 @@ class Puzzle {
         ];
 
         this.cubes = [
-            new Cube(x - Puzzle.SIZE, y - Puzzle.SIZE, z - Puzzle.SIZE, Puzzle.SIZE, this, [
+            new Cube(x - Puzzle.SIZE, y - Puzzle.SIZE, z - Puzzle.SIZE, Puzzle.SIZE, [
                 [BLUE, BLACK],
                 [BLACK, BLACK],
                 [ORANGE, BLACK],
@@ -140,7 +138,7 @@ class Puzzle {
                 [BLACK, BLACK],
                 [WHITE, BLACK],
             ]),
-            new Cube(x - Puzzle.SIZE, y - Puzzle.SIZE, z, Puzzle.SIZE, this, [
+            new Cube(x - Puzzle.SIZE, y - Puzzle.SIZE, z, Puzzle.SIZE, [
                 [BLUE, BLACK],
                 [BLACK, BLACK],
                 [ORANGE, BLACK],
@@ -148,7 +146,7 @@ class Puzzle {
                 [BLACK, BLACK],
                 [BLACK, BLACK],
             ]),
-            new Cube(x - Puzzle.SIZE, y - Puzzle.SIZE, z + Puzzle.SIZE, Puzzle.SIZE, this, [
+            new Cube(x - Puzzle.SIZE, y - Puzzle.SIZE, z + Puzzle.SIZE, Puzzle.SIZE, [
                 [BLUE, BLACK],
                 [BLACK, BLACK],
                 [ORANGE, BLACK],
@@ -156,7 +154,7 @@ class Puzzle {
                 [RED, BLACK],
                 [BLACK, BLACK],
             ]),
-            new Cube(x - Puzzle.SIZE, y, z - Puzzle.SIZE, Puzzle.SIZE, this, [
+            new Cube(x - Puzzle.SIZE, y, z - Puzzle.SIZE, Puzzle.SIZE, [
                 [BLACK, BLACK],
                 [BLACK, BLACK],
                 [ORANGE, BLACK],
@@ -164,7 +162,7 @@ class Puzzle {
                 [BLACK, BLACK],
                 [WHITE, BLACK],
             ]),
-            new Cube(x - Puzzle.SIZE, y, z, Puzzle.SIZE, this, [
+            new Cube(x - Puzzle.SIZE, y, z, Puzzle.SIZE, [
                 [BLACK, BLACK],
                 [BLACK, BLACK],
                 [ORANGE, BLACK],
@@ -172,7 +170,7 @@ class Puzzle {
                 [BLACK, BLACK],
                 [BLACK, BLACK],
             ]),
-            new Cube(x - Puzzle.SIZE, y, z + Puzzle.SIZE, Puzzle.SIZE, this, [
+            new Cube(x - Puzzle.SIZE, y, z + Puzzle.SIZE, Puzzle.SIZE, [
                 [BLACK, BLACK],
                 [BLACK, BLACK],
                 [ORANGE, BLACK],
@@ -180,7 +178,7 @@ class Puzzle {
                 [RED, BLACK],
                 [BLACK, BLACK],
             ]),
-            new Cube(x - Puzzle.SIZE, y + Puzzle.SIZE, z - Puzzle.SIZE, Puzzle.SIZE, this, [
+            new Cube(x - Puzzle.SIZE, y + Puzzle.SIZE, z - Puzzle.SIZE, Puzzle.SIZE, [
                 [BLACK, BLACK],
                 [GREEN, BLACK],
                 [ORANGE, BLACK],
@@ -188,7 +186,7 @@ class Puzzle {
                 [BLACK, BLACK],
                 [WHITE, BLACK],
             ]),
-            new Cube(x - Puzzle.SIZE, y + Puzzle.SIZE, z, Puzzle.SIZE, this, [
+            new Cube(x - Puzzle.SIZE, y + Puzzle.SIZE, z, Puzzle.SIZE, [
                 [BLACK, BLACK],
                 [GREEN, BLACK],
                 [ORANGE, BLACK],
@@ -196,7 +194,7 @@ class Puzzle {
                 [BLACK, BLACK],
                 [BLACK, BLACK],
             ]),
-            new Cube(x - Puzzle.SIZE, y + Puzzle.SIZE, z + Puzzle.SIZE, Puzzle.SIZE, this, [
+            new Cube(x - Puzzle.SIZE, y + Puzzle.SIZE, z + Puzzle.SIZE, Puzzle.SIZE, [
                 [BLACK, BLACK],
                 [GREEN, BLACK],
                 [ORANGE, BLACK],
@@ -204,7 +202,7 @@ class Puzzle {
                 [RED, BLACK],
                 [BLACK, BLACK],
             ]),
-            new Cube(x, y - Puzzle.SIZE, z - Puzzle.SIZE, Puzzle.SIZE, this, [
+            new Cube(x, y - Puzzle.SIZE, z - Puzzle.SIZE, Puzzle.SIZE, [
                 [BLUE, BLACK],
                 [BLACK, BLACK],
                 [BLACK, BLACK],
@@ -212,7 +210,7 @@ class Puzzle {
                 [BLACK, BLACK],
                 [WHITE, BLACK],
             ]),
-            new Cube(x, y - Puzzle.SIZE, z, Puzzle.SIZE, this, [
+            new Cube(x, y - Puzzle.SIZE, z, Puzzle.SIZE, [
                 [BLUE, BLACK],
                 [BLACK, BLACK],
                 [BLACK, BLACK],
@@ -220,7 +218,7 @@ class Puzzle {
                 [BLACK, BLACK],
                 [BLACK, BLACK],
             ]),
-            new Cube(x, y - Puzzle.SIZE, z + Puzzle.SIZE, Puzzle.SIZE, this, [
+            new Cube(x, y - Puzzle.SIZE, z + Puzzle.SIZE, Puzzle.SIZE, [
                 [BLUE, BLACK],
                 [BLACK, BLACK],
                 [BLACK, BLACK],
@@ -228,7 +226,7 @@ class Puzzle {
                 [RED, BLACK],
                 [WHITE, BLACK],
             ]),
-            new Cube(x, y, z - Puzzle.SIZE, Puzzle.SIZE, this, [
+            new Cube(x, y, z - Puzzle.SIZE, Puzzle.SIZE, [
                 [BLACK, BLACK],
                 [BLACK, BLACK],
                 [BLACK, BLACK],
@@ -236,7 +234,7 @@ class Puzzle {
                 [BLACK, BLACK],
                 [WHITE, BLACK],
             ]),
-            new Cube(x, y, z, Puzzle.SIZE, this, [
+            new Cube(x, y, z, Puzzle.SIZE, [
                 [BLACK, BLACK],
                 [BLACK, BLACK],
                 [BLACK, BLACK],
@@ -244,7 +242,7 @@ class Puzzle {
                 [BLACK, BLACK],
                 [BLACK, BLACK],
             ]),
-            new Cube(x, y, z + Puzzle.SIZE, Puzzle.SIZE, this, [
+            new Cube(x, y, z + Puzzle.SIZE, Puzzle.SIZE, [
                 [BLACK, BLACK],
                 [BLACK, BLACK],
                 [BLACK, BLACK],
@@ -252,7 +250,7 @@ class Puzzle {
                 [RED, BLACK],
                 [BLACK, BLACK],
             ]),
-            new Cube(x, y + Puzzle.SIZE, z - Puzzle.SIZE, Puzzle.SIZE, this, [
+            new Cube(x, y + Puzzle.SIZE, z - Puzzle.SIZE, Puzzle.SIZE, [
                 [BLACK, BLACK],
                 [GREEN, BLACK],
                 [BLACK, BLACK],
@@ -260,7 +258,7 @@ class Puzzle {
                 [BLACK, BLACK],
                 [WHITE, BLACK],
             ]),
-            new Cube(x, y + Puzzle.SIZE, z, Puzzle.SIZE, this, [
+            new Cube(x, y + Puzzle.SIZE, z, Puzzle.SIZE, [
                 [BLACK, BLACK],
                 [GREEN, BLACK],
                 [BLACK, BLACK],
@@ -268,7 +266,7 @@ class Puzzle {
                 [BLACK, BLACK],
                 [BLACK, BLACK],
             ]),
-            new Cube(x, y + Puzzle.SIZE, z + Puzzle.SIZE, Puzzle.SIZE, this, [
+            new Cube(x, y + Puzzle.SIZE, z + Puzzle.SIZE, Puzzle.SIZE, [
                 [BLACK, BLACK],
                 [GREEN, BLACK],
                 [BLACK, BLACK],
@@ -276,7 +274,7 @@ class Puzzle {
                 [RED, BLACK],
                 [BLACK, BLACK],
             ]),
-            new Cube(x + Puzzle.SIZE, y - Puzzle.SIZE, z - Puzzle.SIZE, Puzzle.SIZE, this, [
+            new Cube(x + Puzzle.SIZE, y - Puzzle.SIZE, z - Puzzle.SIZE, Puzzle.SIZE, [
                 [BLUE, BLACK],
                 [BLACK, BLACK],
                 [BLACK, BLACK],
@@ -284,7 +282,7 @@ class Puzzle {
                 [BLACK, BLACK],
                 [WHITE, BLACK],
             ]),
-            new Cube(x + Puzzle.SIZE, y - Puzzle.SIZE, z, Puzzle.SIZE, this, [
+            new Cube(x + Puzzle.SIZE, y - Puzzle.SIZE, z, Puzzle.SIZE, [
                 [BLUE, BLACK],
                 [BLACK, BLACK],
                 [BLACK, BLACK],
@@ -292,7 +290,7 @@ class Puzzle {
                 [BLACK, BLACK],
                 [BLACK, BLACK],
             ]),
-            new Cube(x + Puzzle.SIZE, y - Puzzle.SIZE, z + Puzzle.SIZE, Puzzle.SIZE, this, [
+            new Cube(x + Puzzle.SIZE, y - Puzzle.SIZE, z + Puzzle.SIZE, Puzzle.SIZE, [
                 [BLUE, BLACK],
                 [BLACK, BLACK],
                 [BLACK, BLACK],
@@ -300,7 +298,7 @@ class Puzzle {
                 [RED, BLACK],
                 [BLACK, BLACK],
             ]),
-            new Cube(x + Puzzle.SIZE, y, z - Puzzle.SIZE, Puzzle.SIZE, this, [
+            new Cube(x + Puzzle.SIZE, y, z - Puzzle.SIZE, Puzzle.SIZE, [
                 [BLACK, BLACK],
                 [BLACK, BLACK],
                 [BLACK, BLACK],
@@ -308,7 +306,7 @@ class Puzzle {
                 [BLACK, BLACK],
                 [WHITE, BLACK],
             ]),
-            new Cube(x + Puzzle.SIZE, y, z, Puzzle.SIZE, this, [
+            new Cube(x + Puzzle.SIZE, y, z, Puzzle.SIZE, [
                 [BLACK, BLACK],
                 [BLACK, BLACK],
                 [BLACK, BLACK],
@@ -316,7 +314,7 @@ class Puzzle {
                 [BLACK, BLACK],
                 [BLACK, BLACK],
             ]),
-            new Cube(x + Puzzle.SIZE, y, z + Puzzle.SIZE, Puzzle.SIZE, this, [
+            new Cube(x + Puzzle.SIZE, y, z + Puzzle.SIZE, Puzzle.SIZE, [
                 [BLACK, BLACK],
                 [BLACK, BLACK],
                 [BLACK, BLACK],
@@ -324,7 +322,7 @@ class Puzzle {
                 [RED, BLACK],
                 [BLACK, BLACK],
             ]),
-            new Cube(x + Puzzle.SIZE, y + Puzzle.SIZE, z - Puzzle.SIZE, Puzzle.SIZE, this, [
+            new Cube(x + Puzzle.SIZE, y + Puzzle.SIZE, z - Puzzle.SIZE, Puzzle.SIZE, [
                 [BLACK, BLACK],
                 [GREEN, BLACK],
                 [BLACK, BLACK],
@@ -332,7 +330,7 @@ class Puzzle {
                 [BLACK, BLACK],
                 [WHITE, BLACK],
             ]),
-            new Cube(x + Puzzle.SIZE, y + Puzzle.SIZE, z, Puzzle.SIZE, this, [
+            new Cube(x + Puzzle.SIZE, y + Puzzle.SIZE, z, Puzzle.SIZE, [
                 [BLACK, BLACK],
                 [GREEN, BLACK],
                 [BLACK, BLACK],
@@ -340,7 +338,7 @@ class Puzzle {
                 [BLACK, BLACK],
                 [BLACK, BLACK],
             ]),
-            new Cube(x + Puzzle.SIZE, y + Puzzle.SIZE, z + Puzzle.SIZE, Puzzle.SIZE, this, [
+            new Cube(x + Puzzle.SIZE, y + Puzzle.SIZE, z + Puzzle.SIZE, Puzzle.SIZE, [
                 [BLACK, BLACK],
                 [GREEN, BLACK],
                 [BLACK, BLACK],
@@ -606,7 +604,7 @@ function actionPerformed() {
 
                 const D = dot(n, p0);
 
-                puzzle.cubes.forEach((c) => {
+                const affectedCubes = puzzle.cubes.filter((c) => {
                     const mesh = c.computeMesh();
 
                     mesh.vertices = mesh.vertices.map((pt) =>
@@ -616,22 +614,53 @@ function actionPerformed() {
                     const signs = mesh.vertices.map((p) => Math.sign(dot(p, n) - D));
 
                     // check if the plane intersects the cube
-                    if (signs.includes(-1) && signs.includes(1)) {
-                        const t = c.textures;
+                    return signs.includes(-1) && signs.includes(1);
+                });
 
-                        // TEMPORARY
-                        c.textures = [
-                            [BLACK, BLACK],
-                            [BLACK, BLACK],
-                            [BLACK, BLACK],
-                            [BLACK, BLACK],
-                            [BLACK, BLACK],
-                            [BLACK, BLACK],
-                        ];
+                if (affectedCubes.length !== 9)
+                    console.warn("test failed: number of affected cubes is not 9");
 
-                        setTimeout(() => (c.textures = t), 500);
-                        // END TEMPORARY
-                    }
+                const crosses = affectedCubes
+                    .slice(0, -2)
+                    .map((_, i) => {
+                        const a = affectedCubes[i];
+                        const b = affectedCubes[i + 1];
+                        const c = affectedCubes[i + 2];
+
+                        const v1 = sub([a.x, a.y, a.z], [b.x, b.y, b.z]);
+                        const v2 = sub([b.x, b.y, b.z], [c.x, c.y, c.z]);
+
+                        // need to prevent rounding errors
+                        const p = cross(v1, v2).map(Math.round);
+
+                        const m = Math.hypot(...p);
+
+                        if (m === 0) return [0, 0, 0];
+
+                        return p.map((x) => Math.abs(x / m));
+                    })
+                    .filter((x) => x.some((n) => n !== 0));
+
+                const components = new Set(crosses.map((x) => x.indexOf(1)));
+
+                // all affected cubes should point the same direction
+                if (components.size > 1)
+                    console.warn("test failed: cross products of affected cubes were not uniform");
+
+                const [index] = components;
+
+                // find the correct axis
+                const axis = crosses.find((x) => x[index] === 1);
+
+                const cx = affectedCubes.map((c) => c.x).reduce((a, b) => a + b, 0) / affectedCubes.length;
+                const cy = affectedCubes.map((c) => c.y).reduce((a, b) => a + b, 0) / affectedCubes.length;
+                const cz = affectedCubes.map((c) => c.z).reduce((a, b) => a + b, 0) / affectedCubes.length;
+
+                // direction to rotate
+                const dir = 1;
+
+                affectedCubes.forEach((c) => {
+                    c.rotateAbout(axisToQuaternion(...axis, (Math.PI / 2) * dir), [cx, cy, cz]);
                 });
 
                 mouse.context.moved = true;
@@ -654,6 +683,8 @@ window.addEventListener("resize", () => {
 });
 
 function pointermove(e) {
+    if ("touches" in e && e.touches.length > 1) return;
+
     if (mouse.down) {
         mouse.lastx = mouse.x;
         mouse.lasty = mouse.y;
@@ -667,6 +698,8 @@ function pointermove(e) {
 }
 
 function pointerdown(e) {
+    if ("touches" in e && e.touches.length > 1) return;
+
     mouse.x = mouse.ox = mouse.lastx = e.touches?.[0]?.clientX ?? e.clientX;
     mouse.y = mouse.oy = mouse.lasty = e.touches?.[0]?.clientY ?? e.clientY;
 
@@ -723,6 +756,8 @@ function pointerdown(e) {
 }
 
 function pointerup(e) {
+    if ("touches" in e && e.touches.length > 1) return;
+
     mouse.x = mouse.lastx = e.touches?.[0]?.clientX ?? e.clientX;
     mouse.y = mouse.lasty = e.touches?.[0]?.clientY ?? e.clientY;
 
@@ -759,6 +794,11 @@ window.addEventListener("wheel", (e) => {
     if (SETTINGS.ZOOM < 500 && e.deltaY < 0) return;
 
     SETTINGS.ZOOM += Math.sign(e.deltaY) * 100 * (SETTINGS.SENSITIVITY + 0.1);
+});
+
+// annoying shit pops up on trackpad
+window.addEventListener("contextmenu", (e) => {
+    e.preventDefault();
 });
 
 function dot(a, b) {
