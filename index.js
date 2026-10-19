@@ -366,7 +366,9 @@ class Puzzle {
         for (const cube of this.cubes) {
             const mesh = cube.computeMesh();
 
-            mesh.vertices = mesh.vertices.map((pt) => rotate3d(pt, this.rotation, [this.x, this.y, this.z]));
+            mesh.vertices = mesh.vertices.map((pt) =>
+                rotate3d(pt, this.rotation, [this.x, this.y, this.z]),
+            );
 
             group.edges.push(...mesh.edges.map((x) => x.map((n) => n + group.vertices.length)));
             group.faces.push(...mesh.faces.map((x) => x.map((n) => n + group.vertices.length)));
@@ -448,7 +450,8 @@ class Puzzle {
                     ) {
                         ctx.beginPath();
                         ctx.moveTo(...project2d(mesh.vertices[indices[0]]));
-                        for (const pt of indices.slice(1)) ctx.lineTo(...project2d(mesh.vertices[pt]));
+                        for (const pt of indices.slice(1))
+                            ctx.lineTo(...project2d(mesh.vertices[pt]));
                         ctx.closePath();
 
                         ctx.fillStyle = texture[0];
@@ -593,12 +596,42 @@ function update() {
                 // find the correct axis
                 const axis = crosses.find((x) => x[index] === 1);
 
-                const cx = affectedCubes.map((c) => c.x).reduce((a, b) => a + b, 0) / affectedCubes.length;
-                const cy = affectedCubes.map((c) => c.y).reduce((a, b) => a + b, 0) / affectedCubes.length;
-                const cz = affectedCubes.map((c) => c.z).reduce((a, b) => a + b, 0) / affectedCubes.length;
+                const cx =
+                    affectedCubes.map((c) => c.x).reduce((a, b) => a + b, 0) / affectedCubes.length;
+                const cy =
+                    affectedCubes.map((c) => c.y).reduce((a, b) => a + b, 0) / affectedCubes.length;
+                const cz =
+                    affectedCubes.map((c) => c.z).reduce((a, b) => a + b, 0) / affectedCubes.length;
 
-                // direction to rotate
-                const dir = 1;
+                const center3d = rotate3d([cx, cy, cz], puzzle.rotation, [
+                    puzzle.x,
+                    puzzle.y,
+                    puzzle.z,
+                ]);
+
+                // project to screen
+                const center2d = project2d(center3d);
+
+                // vector from layer center -> mouse start
+                const radius = [
+                    mouse.ox - canvas.width / 2 - center2d[0],
+                    mouse.oy - canvas.height / 2 - center2d[1],
+                ];
+
+                // mouse drag vector
+                const drag = [mouse.x - mouse.ox, mouse.y - mouse.oy];
+
+                // 2D cross product
+                const z = cross(radius, drag);
+
+                // determine rotation direction
+                let dir = z > 0 ? -1 : 1; // ????/
+
+                const normal = cross(sub(vertices[1], vertices[0]), sub(vertices[2], vertices[1]));
+
+                const facing = dot(normal, [0, 0, -1]) > 0;
+
+                if (!facing) dir *= -1;
 
                 affectedCubes.forEach((c) => {
                     c.rotateAbout(axisToQuaternion(...axis, (Math.PI / 2) * dir), [cx, cy, cz]);
@@ -680,7 +713,8 @@ function pointerdown(e) {
         // not in bounding box
         if (realx < minx || realx > maxx || realy < miny || realy > maxy) continue;
 
-        const quad = triangleArea([face[0], face[1], face[2]]) + triangleArea([face[0], face[3], face[2]]);
+        const quad =
+            triangleArea([face[0], face[1], face[2]]) + triangleArea([face[0], face[3], face[2]]);
 
         const tri1 = triangleArea([face[0], face[1], [realx, realy]]);
         const tri2 = triangleArea([face[1], face[2], [realx, realy]]);
@@ -690,7 +724,12 @@ function pointerdown(e) {
         // mouse is outside the face
         if (tri1 + tri2 + tri3 + tri4 > quad) continue;
 
-        mouse.context = { cube, face, vertices: indices.map((i) => mesh.vertices[i]), moved: false };
+        mouse.context = {
+            cube,
+            face,
+            vertices: indices.map((i) => mesh.vertices[i]),
+            moved: false,
+        };
 
         break;
     }
